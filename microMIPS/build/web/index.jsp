@@ -1,4 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page import="Model.*"%>
+<%@page import="java.util.*"%>
 <!DOCTYPE html>
 
 <html>
@@ -53,7 +55,12 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <th><textarea id="codeInput" name="codeInput" rows="15"></textarea></th>
+                                    <th><textarea id="codeInput" name="codeInput" rows="15"><%
+                                                ArrayList<Code> c = (ArrayList<Code>) request.getAttribute("code");
+                                                if (c != null) {
+                                                    out.print(c.get(0).getInstruction());
+                                                }
+                                            %></textarea></th>
                                     <th><textarea id="regInput" name="regInput" rows="15"></textarea></th>
                                     <th><textarea id="memInput" name="memInput" rows="15"></textarea></th>
                                 </tr>
@@ -101,12 +108,19 @@
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <td>Instruction</td>
+                                                <!--<td>Instruction</td>
                                                 <td>R31-26</td>
                                                 <td>R25-21</td>
                                                 <td>R20-16</td>
                                                 <td>R15-0</td>
-                                                <td>Hex</td>
+                                                <td>Hex</td>-->
+                                                <td>
+                                                    <%
+                                                        if (c != null) {
+                                                            out.print(c.get(0).getOpcode());
+                                                        }
+                                                    %>
+                                                </td>
                                             </tr>
                                         </tbody>
                                     </table>

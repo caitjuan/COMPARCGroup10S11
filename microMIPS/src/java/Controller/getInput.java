@@ -1,7 +1,7 @@
 package Controller;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -47,6 +47,10 @@ public class getInput extends HttpServlet {
             }
             code.add(c);
         }
+        
+        request.setAttribute("code",code);
+        RequestDispatcher rd = request.getRequestDispatcher("index.jsp");
+        rd.forward(request, response);
     }
 
     @Override
