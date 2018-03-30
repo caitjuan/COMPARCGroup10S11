@@ -1,0 +1,28 @@
+body {
+    margin: 10px;
+}
+#input table, #view table {
+    margin: auto;
+    padding: 10px;
+    table-layout: fixed;
+}
+
+#input textarea {
+    resize: none;
+    width: 100%;
+}
+
+#view table td, #run table td{
+    font-weight: normal;
+}
+
+.btn:hover {
+    background-color: #b8b8b8 !important;
+}
+
+.center-div {
+    margin: auto;
+    width: 60%;
+    padding: 10px;
+    text-align: center;
+}
