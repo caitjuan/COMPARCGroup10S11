@@ -18,7 +18,7 @@ public class getInput extends HttpServlet {
     ArrayList<Code> code = new ArrayList<>();
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         String codeInput = request.getParameter("codeInput");
@@ -50,7 +50,7 @@ public class getInput extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
     }

@@ -42,7 +42,7 @@
                 <!-- INPUT TAB -->
                 <div id="input" class="tab-pane">
                     <h3>INPUT</h3>
-                    <form name="input-form" method="get" action="getInput">
+                    <form name="input-form" method="post" action="getInput">
                         <table class="table">
                             <thead>
                                 <tr>
