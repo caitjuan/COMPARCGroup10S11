@@ -12,13 +12,13 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
         <link rel="stylesheet" href="style.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>        
     </head>
     <body>
         <div>
             <ul class="nav nav-tabs">
-                <li class="active"><a data-toggle="tab" href="#home">Home</a></li>
-                <li><a data-toggle="tab" href="#input">Input</a></li>
+                <li><a data-toggle="tab" href="#home">Home</a></li>
+                <li class="active"><a data-toggle="tab" href="#input">Input</a></li>
                 <li><a data-toggle="tab" href="#view">View</a></li>
                 <li><a data-toggle="tab" href="#run">Run</a></li>
             </ul>
@@ -26,7 +26,7 @@
             <div class="tab-content">
 
                 <!-- HOME TAB -->
-                <div id="home" class="tab-pane in active">
+                <div id="home" class="tab-pane">
                     <h3>HOME</h3>
                     <br>
                     <h4>Welcome to microMIPS - the mini MIPSers</h4>
@@ -43,7 +43,7 @@
                 </div>
 
                 <!-- INPUT TAB -->
-                <div id="input" class="tab-pane">
+                <div id="input" class="tab-pane in active">
                     <h3>INPUT</h3>
                     <form name="input-form" method="post" action="getInput">
                         <table class="table">
@@ -59,23 +59,25 @@
                                     <th><textarea id="codeInput" name="codeInput" rows="15"><%
                                         ArrayList<String> inst = (ArrayList<String>) request.getAttribute("inst");
                                         if (inst != null) {
-                                            for(int i = 0; i < inst.size(); i++)
+                                            for (int i = 0; i < inst.size(); i++) {
                                                 out.print(inst.get(i));
+                                            }
                                         }
                                             %></textarea></th>
                                     <th>
                                         <div style="overflow-y:scroll;height:305px;display:block;">
                                             <table>
-                                                <%  ArrayList<GPRegs> regs = (ArrayList<GPRegs>) request.getAttribute("regs"); 
+                                                <%  ArrayList<GPRegs> regs = (ArrayList<GPRegs>) request.getAttribute("regs");
                                                     String[] regValue = new String[32];
-                                                    if(regs == null)
-                                                        for(int i = 0; i < 32; i++){
+                                                    if (regs == null) {
+                                                        for (int i = 0; i < 32; i++) {
                                                             regValue[i] = "0000000000000000";
                                                         }
-                                                    else
-                                                        for(int i = 0; i < 32; i++){
+                                                    } else {
+                                                        for (int i = 0; i < 32; i++) {
                                                             regValue[i] = regs.get(i).getReg();
                                                         }
+                                                    }
                                                 %>
                                                 <tr><th>R0:</th> <th><input type="text" name="R0" value="0000000000000000" readonly></th></tr>
                                                 <tr><th>R1:</th> <th><input type="text" name="R1" value="<%= regValue[1]%>"></th></tr>
@@ -116,6 +118,9 @@
                                         <div style="overflow-y:scroll;height:305px;display:block;">
                                             <%
                                                 String hex;
+                                                String value1 = "0000000000000000";
+                                                String value2 = "0000000000000000";
+
                                                 for (int i = 0; i < 256; i++) {
 
                                                     hex = Integer.toHexString(i);
@@ -133,9 +138,15 @@
 
                                                     hex = String.valueOf(zeroExtend);
                                                     hex = hex.substring(0, 3);
+
+                                                    ArrayList<Memory> mem = (ArrayList<Memory>) request.getAttribute("mem");
+                                                    if (mem != null) {
+                                                        value1 = mem.get(i).getValue();
+                                                        value2 = mem.get(i+1).getValue();
+                                                    }
                                             %>
-                                            <%= hex.toUpperCase()%>0: <input type="text" value="0000000000000000" name="<%= hex.toUpperCase()%>0" /><br>
-                                            <%= hex.toUpperCase()%>8: <input type="text" value="0000000000000000" name="<%= hex.toUpperCase()%>8" /><br>                        
+                                            <%= hex.toUpperCase()%>0: <input type="text" value="<%=value1%>" name="<%= hex.toUpperCase()%>0" /><br>
+                                            <%= hex.toUpperCase()%>8: <input type="text" value="<%=value2%>" name="<%= hex.toUpperCase()%>8" /><br>                        
                                             <%}%>
                                         </div></th>
                                 </tr>
@@ -144,7 +155,7 @@
 
                         <div class="center-div">
                             <input type="submit" value="Load" class="btn" />
-                            <input type="submit" value="Reset" class="btn" />
+                            <input type="reset" value="Reset" class="btn" />
                         </div>
                     </form>
 
@@ -152,19 +163,26 @@
                         <tbody>
                             <tr>
                                 <th><textarea id="error" rows="4"><%
-                                        ArrayList<Errors> e = (ArrayList<Errors>) request.getAttribute("errors");
-                                        if (e != null) {
-                                            for(int i = 0; i < e.size(); i++)
-                                                out.println(e.get(i).getError());
+                                    ArrayList<String> errReg = (ArrayList<String>) request.getAttribute("errReg");
+                                    if (errReg != null) {
+                                        for (int i = 0; i < errReg.size(); i++) {
+                                            out.println(errReg.get(i));
                                         }
-                                        
-                                        ArrayList<String> errReg = (ArrayList<String>) request.getAttribute("errReg");
-                                        if(errReg != null) {
-                                            for(int i = 0; i < errReg.size(); i++){
-                                                out.println(errReg.get(i));
-                                            }
+                                    }
+
+                                    ArrayList<String> errMem = (ArrayList<String>) request.getAttribute("errMem");
+                                    if (errMem != null) {
+                                        for (int i = 0; i < errMem.size(); i++) {
+                                            out.println(errMem.get(i));
                                         }
-                                            %></textarea></th>
+                                    }
+                                    
+                                    ArrayList<Errors> e = (ArrayList<Errors>) request.getAttribute("errors");
+                                    if (e != null) {
+                                        for (int i = 0; i < e.size(); i++) {
+                                            out.print(e.get(i).getError());
+                                        }
+                                    }%></textarea></th>
                             </tr>
                         </tbody>
                     </table>
