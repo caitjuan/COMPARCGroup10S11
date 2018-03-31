@@ -497,17 +497,66 @@ public class getInput extends HttpServlet {
         return errors;
     }
 
-    private String removeSpace(String ins) {
-        return ins.substring(1);
+    private static String removeSpace (String ins) {
+        return ins.substring(1);       
     }
-
-    private String DECtoBIN(int num, int bits) {
+    
+    private static String HEXtoBIN (String binary) {
+        char[] binaryARRAY = binary.toUpperCase().toCharArray();
+        int size = binary.length();
         StringBuilder builder = new StringBuilder();
-        double bit = (bits - 1) * 1.0,
+        String HEXtoBINTable[][] = {
+            {"0000",	"0"}, {"0001",	"1"}, {"0010",	"2"},       
+            {"0011",	"3"}, {"0100",	"4"}, {"0101",	"5"},       
+            {"0110",	"6"}, {"0111",	"7"}, {"1000",	"8"}, 
+            {"1001",	"9"}, {"1010",	"A"}, {"1011",	"B"},       
+            {"1100",	"C"}, {"1101",	"D"}, {"1110",	"E"},       
+            {"1111",	"F"}, 
+        };
+        
+        for (int ctr = 0; ctr < size; ctr++) {
+            for (int tctr = 0; tctr < 16; tctr++) {
+                if ( HEXtoBINTable[tctr][1].equals( String.valueOf(binaryARRAY[ctr])) ) {
+                    builder.append(HEXtoBINTable[tctr][0]);
+                    break;
+                }
+            }
+        }
+        
+        return builder.toString();
+    }
+    
+    private static String BINtoHEX (String binary) {
+        int digit = binary.length()/4;
+        StringBuilder builder = new StringBuilder();
+        String BINtoHEXTable[][] = {
+            {"0000",	"0"}, {"0001",	"1"}, {"0010",	"2"},       
+            {"0011",	"3"}, {"0100",	"4"}, {"0101",	"5"},       
+            {"0110",	"6"}, {"0111",	"7"}, {"1000",	"8"}, 
+            {"1001",	"9"}, {"1010",	"A"}, {"1011",	"B"},       
+            {"1100",	"C"}, {"1101",	"D"}, {"1110",	"E"},       
+            {"1111",	"F"}, 
+        };        
+        
+        for (int ctr = 0; ctr < digit; ctr++) {
+            for (int tctr=0; tctr < 16; tctr++) {
+                if ( BINtoHEXTable[tctr][0].equals( binary.substring((ctr*4),(ctr*4+4)) ) ) {
+                    builder.append(BINtoHEXTable[tctr][1]);
+                    break;
+                }
+            }
+        }
+        
+        return builder.toString();
+    }
+    
+    private static String DECtoBIN (int num, int bits) {
+        StringBuilder builder = new StringBuilder();
+        double  bit = (bits-1) * 1.0, 
                 value = num * 1.0;
         int doLoop;
         do {
-            if (Math.pow(2.0, bit) <= value) {
+            if (Math.pow(2.0, bit) <= value ) {
                 builder.append("1");
                 value = value - Math.pow(2.0, bit);
             } else {
@@ -519,18 +568,18 @@ public class getInput extends HttpServlet {
 
         return builder.toString();
     }
-
-    private String twosCOMP(int num, int bits) {
+    
+    private static String twosCOMP (int num, int bits) {
         double neg = Math.pow(2.0, bits) - num;
-        return (DECtoBIN((int) neg, bits));
+        return (DECtoBIN((int)neg, bits));
     }
-
-    private String findLabelOffset(String label, ArrayList<String> code, int pctr, int bits) {
+    
+    private static String findLabelOffset (String label, ArrayList<String> code, int pctr, int bits) {
         String offset = "";
         int result;
-
-        for (int ctr = 0; ctr < code.size(); ctr++) {
-            if (code.get(ctr).startsWith(label)) {
+        
+        for(int ctr = 0; ctr < code.size(); ctr++) {
+            if(code.get(ctr).startsWith(label)) {
                 if (ctr < pctr) {
                     result = pctr - ctr + 1;
                     offset = twosCOMP(result, bits);
@@ -539,201 +588,177 @@ public class getInput extends HttpServlet {
                     offset = DECtoBIN(result, bits);
                 }
             }
-        }
-
+        } 
+        
         return offset;
     }
-
-    private String convertFORMAT1(String instruction, String OPCODE, ArrayList<String> code, int pctr) {
+    
+    private static String convertFORMAT1(String instruction, String OPCODE, ArrayList<String> code, int pctr) {
         StringBuilder builder = new StringBuilder();
-        /* FORMAT 2: Instruction RT, RS, immediate
-            opcode  rs  	rt          imm
-            OPCODE  splitRS[0]  splitRT[0]  splitRS[1]
-         */
-        String[] splitIns = instruction.split(" ", 2);
-        while (splitIns[1].startsWith(" ") == true) {
+        /* FORMAT 1: Instruction offset
+            opcode  offset
+            OPCODE  splitIns[1]
+        */
+        String[] splitIns = instruction.split(" ", 2);     
+        while (splitIns[1].startsWith(" ") == true) {   
             splitIns[1] = removeSpace(splitIns[1]);
         }
-
+        
         builder.append(OPCODE);
-        builder.append(" ");
         builder.append(findLabelOffset(splitIns[1], code, pctr, 26));
-
+        
         return builder.toString();
     }
-
-    private String convertFORMAT2(String instruction, String OPCODE) {
+    
+    private static String convertFORMAT2(String instruction, String OPCODE) {
         StringBuilder builder = new StringBuilder();
         /* FORMAT 2: Instruction RT, RS, immediate
             opcode  rs  	rt          imm
             OPCODE  splitRS[0]  splitRT[0]  splitRS[1]
-         */
-        String[] splitIns = instruction.split(" ", 2);
-        while (splitIns[1].startsWith(" ") == true) {
+        */
+        String[] splitIns = instruction.split(" ", 2);     
+        while (splitIns[1].startsWith(" ") == true) {   
             splitIns[1] = removeSpace(splitIns[1]);
         }
         String[] splitRT = splitIns[1].split(",", 2);
-        while (splitRT[1].startsWith(" ") == true) {
+        while (splitRT[1].startsWith(" ") == true) {   
             splitRT[1] = removeSpace(splitRT[1]);
         }
         String[] splitRS = splitRT[1].split(",", 2);
-        while (splitRS[1].startsWith(" ") == true) {
+        while (splitRS[1].startsWith(" ") == true) {   
             splitRS[1] = removeSpace(splitRS[1]);
         }
-
+        
         builder.append(OPCODE);
-        builder.append(" ");
         builder.append(DECtoBIN(Integer.parseInt(splitRS[0].substring(1)), 5));
-        builder.append(" ");
         builder.append(DECtoBIN(Integer.parseInt(splitRT[0].substring(1)), 5));
-        builder.append(" ");
-
-        for (int ctr = 1; ctr < 5; ctr++) {
-            builder.append(DECtoBIN(Character.getNumericValue(splitRS[1].charAt(ctr)), 4));
-            builder.append(" ");
-        }
-
+        builder.append(HEXtoBIN( splitRS[1].substring(1) ));
+        
         return builder.toString();
     }
-
-    private String convertFORMAT3(String instruction, String OPCODE) {
+    
+    private static String convertFORMAT3(String instruction, String OPCODE) {
         StringBuilder builder = new StringBuilder();
-
+        
         /* FORMAT 3: Instruction RT, offset(base)
             opcode  base            rt/ft       offset 
             OPCODE  splitoffset[1]  splitRT[0]  splitoffset[0] */
         String[] splitIns = instruction.split(" ", 2);      // RESULT: [0] = "instruction"; [1] = "RT, offset(base)"
-        while (splitIns[1].startsWith(" ") == true) {
+        while (splitIns[1].startsWith(" ") == true) {   
             splitIns[1] = removeSpace(splitIns[1]);
         }
         String[] splitRT = splitIns[1].split(",", 2);       // RESULT: [0] = "RT"; [1] = "offset(base)"
-        while (splitRT[1].startsWith(" ") == true) {
+        while (splitRT[1].startsWith(" ") == true) {   
             splitRT[1] = removeSpace(splitRT[1]);
-        }
+        } 
         String[] splitoffset = splitRT[1].split("\\(", 2);  // RESULT: [0] = "offset; [1] = "base"
         splitoffset[1] = splitoffset[1].substring(0, splitoffset[1].length() - 1);
-
-        builder.append(OPCODE);
-        builder.append(" ");
+        
+        builder.append(OPCODE); 
         builder.append(DECtoBIN(Integer.parseInt(splitoffset[1].substring(1)), 5));
-        builder.append(" ");
         builder.append(DECtoBIN(Integer.parseInt(splitRT[0].substring(1)), 5));
-        builder.append(" ");
-
-        for (int ctr = 0; ctr < 4; ctr++) {
-            builder.append(DECtoBIN(Character.getNumericValue(splitoffset[0].charAt(ctr)), 4));
-            builder.append(" ");
-        }
-
+        builder.append(HEXtoBIN(splitoffset[0]));
+        
         return builder.toString();
-    }
-
-    private String convertFORMAT4(String instruction, String OPCODE, String RT, ArrayList<String> code, int pctr) {
+    }    
+    
+    private static String convertFORMAT4(String instruction, String OPCODE, String RT, ArrayList<String> code, int pctr) {
         StringBuilder builder = new StringBuilder();
-
+        
         /* FORMAT 4: Instruction RS, offset
             opcode  rs          rt  offset	
             OPCODE  splitRS[0]  RT  splitRS[1]  */
-        String[] splitIns = instruction.split(" ", 2);
-        while (splitIns[1].startsWith(" ") == true) {
+        String[] splitIns = instruction.split(" ", 2);     
+        while (splitIns[1].startsWith(" ") == true) {   
             splitIns[1] = removeSpace(splitIns[1]);
         }
-        String[] splitRS = splitIns[1].split(",", 2);
-        while (splitRS[1].startsWith(" ") == true) {
+        String[] splitRS = splitIns[1].split(",", 2);       
+        while (splitRS[1].startsWith(" ") == true) {   
             splitRS[1] = removeSpace(splitRS[1]);
-        }
-
-        builder.append(OPCODE);
-        builder.append(" ");
+        } 
+        
+        builder.append(OPCODE); 
         builder.append(DECtoBIN(Integer.parseInt(splitRS[0].substring(1)), 5));
-        builder.append(" ");
-        builder.append(RT);
-        builder.append(" ");
+        builder.append(RT); 
         builder.append(findLabelOffset(splitRS[1], code, pctr, 16));
-
+        
         return builder.toString();
     }
-
-    private String convertFORMAT5(String instruction, String OPCODE, String SA, String FUNC) {
+    
+    private static String convertFORMAT5(String instruction, String OPCODE, String SA, String FUNC) {
         StringBuilder builder = new StringBuilder();
-
+        
         /* FORMAT 5: Instruction RD, RS, RT
             opcode  rs          rt          rd          sa  func	
             OPCODE  splitRS[0]  splitRS[1]  splitRD[0]  SA  FUNC    */
-        String[] splitIns = instruction.split(" ", 2);
-        while (splitIns[1].startsWith(" ") == true) {
+        String[] splitIns = instruction.split(" ", 2);     
+        while (splitIns[1].startsWith(" ") == true) {   
             splitIns[1] = removeSpace(splitIns[1]);
         }
         String[] splitRD = splitIns[1].split(",", 2);
-        while (splitRD[1].startsWith(" ") == true) {
+        while (splitRD[1].startsWith(" ") == true) {   
             splitRD[1] = removeSpace(splitRD[1]);
         }
         String[] splitRS = splitRD[1].split(",", 2);
-        while (splitRS[1].startsWith(" ") == true) {
+        while (splitRS[1].startsWith(" ") == true) {   
             splitRS[1] = removeSpace(splitRS[1]);
-        }
-
-        builder.append(OPCODE);
-        builder.append(" ");
+        }        
+        
+        builder.append(OPCODE); 
         builder.append(DECtoBIN(Integer.parseInt(splitRS[0].substring(1)), 5));
-        builder.append(" ");
         builder.append(DECtoBIN(Integer.parseInt(splitRS[1].substring(1)), 5));
-        builder.append(" ");
         builder.append(DECtoBIN(Integer.parseInt(splitRD[0].substring(1)), 5));
-        builder.append(" ");
         builder.append(SA);
-        builder.append(" ");
         builder.append(FUNC);
-
+        
         return builder.toString();
     }
-
-    private String convertOPCODE(String instruction, ArrayList<String> code, int pctr) {
-        String opcode = "";
+        
+    private static String convertOPCODE(String instruction, ArrayList<String> code, int pctr) {
+        String opcode;
         String opcodeTable[][] = {
-            /* format	instruc.    opcode      sat      func */
-            {"110010", "", ""}, // FORMAT1 BC
-            {"011001", "", ""}, // FORMAT2 DADDIU
-            {"001110", "", ""}, // FORMAT2 XORI
-            {"110111", "", ""}, // FORMAT3 LD
-            {"111111", "", ""}, // FORMAT3 SD
-            {"000001", "00000", ""}, // 4 BLTZ
-            {"000000", "00000", "101101"}, //FORMAT5 DADDU
-            {"000000", "00000", "101010"}, //FORMAT5 SLT
-        };
+            /* opcode   sa       func */
+            {"110010",	"",      ""},       // FORMAT1 BC
+            {"011001",	"",      ""},       // FORMAT2 DADDIU
+            {"001110",	"",      ""},       // FORMAT2 XORI
+            {"110111",	"",      ""},       // FORMAT3 LD
+            {"111111",	"",      ""},       // FORMAT3 SD
+            {"000001",	"00000", ""},       // FORMAT4 BLTZ
+            {"000000",	"00000", "101101"}, //FORMAT5 DADDU
+            {"000000",	"00000", "101010"}, //FORMAT5 SLT
+        };        
         /*  FORMAT 1:   opcode  offset 
             FORMAT 2:   opcode  rs  	rt      imm
             FORMAT 3:   opcode  base  	rt/ft  	offset
             FORMAT 4:	opcode	rs      sat     offset
-            FORMAT 5:	opcode	rs      rt      rd       sat    func	
-         */
-
-        if (instruction.startsWith("BC") || instruction.startsWith("bc")) {
+            FORMAT 5:	opcode	rs      rt      rd       sa   func */    
+        
+        if(instruction.startsWith("BC")|| instruction.startsWith("bc") )  {
             opcode = convertFORMAT1(instruction, opcodeTable[0][0], code, pctr);
-        } else if (instruction.startsWith("DADDIU") || instruction.startsWith("daddiu")) {
+        } else if(instruction.startsWith("DADDIU")|| instruction.startsWith("daddiu") )  {
             opcode = convertFORMAT2(instruction, opcodeTable[1][0]);
-        } else if (instruction.startsWith("XORI") || instruction.startsWith("xori")) {
+        } else if(instruction.startsWith("XORI")|| instruction.startsWith("xori") )  {
             opcode = convertFORMAT2(instruction, opcodeTable[2][0]);
-        } else if (instruction.startsWith("LD") || instruction.startsWith("ld")) {
-            opcode = convertFORMAT3(instruction, opcodeTable[3][0]);
-        } else if (instruction.startsWith("SD") || instruction.startsWith("sd")) {
+        } else if(instruction.startsWith("LD")|| instruction.startsWith("ld") )  {
+            opcode = convertFORMAT3(instruction, opcodeTable[3][0]);            
+        } else if(instruction.startsWith("SD")|| instruction.startsWith("sd") )  {
             opcode = convertFORMAT3(instruction, opcodeTable[4][0]);
-        } else if (instruction.startsWith("BLTZ") || instruction.startsWith("bltz")) {
+        } else if(instruction.startsWith("BLTZ")|| instruction.startsWith("bltz") )  {
             opcode = convertFORMAT4(instruction, opcodeTable[5][0], opcodeTable[5][1], code, pctr);
-        } else if (instruction.startsWith("DADDU") || instruction.startsWith("daddu")) {
+        } else if(instruction.startsWith("DADDU")|| instruction.startsWith("daddu") )  {
             opcode = convertFORMAT5(instruction, opcodeTable[6][0], opcodeTable[6][1], opcodeTable[6][2]);
-        } else if (instruction.startsWith("SLT") || instruction.startsWith("slt")) {
+        } else if(instruction.startsWith("SLT")|| instruction.startsWith("slt") )  {
             opcode = convertFORMAT5(instruction, opcodeTable[7][0], opcodeTable[7][1], opcodeTable[7][2]);
-        } else if (instruction.startsWith("NOP") || instruction.startsWith("nop")) {
-            opcode = "000000 00000 00000 0000 0000 0000 0000";
+        } else if(instruction.startsWith("NOP")|| instruction.startsWith("nop") )  {
+            opcode = "00000000000000000000000000000000";
         } else {
-            String[] splitLabel = instruction.split(" ", 2);
-            while (splitLabel[1].startsWith(" ") == true) {
+            String[] splitLabel = instruction.split(" ", 2);      
+            while (splitLabel[1].startsWith(" ") == true) {   
                 splitLabel[1] = removeSpace(splitLabel[1]);
             }
-            opcode = convertOPCODE(splitLabel[1], code, pctr);
+            opcode = convertOPCODE(splitLabel[1], code, pctr);      
         }
-
+        
         return opcode;
     }
     
