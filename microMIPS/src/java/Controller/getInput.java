@@ -15,40 +15,66 @@ import java.util.*;
 public class getInput extends HttpServlet {
 
     Code c;
+    Errors e;
+    GPRegs r;
     ArrayList<Code> code = new ArrayList<>();
+    ArrayList<Errors> errors = new ArrayList<>();
+    ArrayList<GPRegs> regs = new ArrayList<>();
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         String codeInput = request.getParameter("codeInput");
-
-        ArrayList<String> error = new ArrayList<String>();
-        ArrayList<String> inst = new ArrayList<String>();
-
-        do {
-            for (String line : codeInput.split("\\n")) {
-                inst.add(line);
-            }
-
-            error = errorCheck(inst);
-            if (error.size() > 1) { //if there's an error
-                inst.clear(); //reset arraylist
-                error.clear();
-            }
+        String[] registers = {"R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11", "R12", "R13", "R14", "R15", "R16", "R17", "R18", "R19", "R20", "R21", "R22", "R23", "R24", "R25", "R26", "R27", "R28", "R29", "R30", "R31"};
+        
+        ArrayList<String> err = new ArrayList<>();
+        ArrayList<String> errReg = new ArrayList<>();
+        ArrayList<String> inst = new ArrayList<>();
+        
+        String temp;
+        
+        //GET REGISTERS
+        for (int i = 0; i < 32; i++) {
+            temp = isNumeric(request.getParameter(registers[i]));
             
-        } while (error.size() > 1);
-
-        for (int i = 0; i < inst.size(); i++) {
-            if (inst.get(i).startsWith(";")) {
-                c = new Code(inst.get(i), null, null); //initialize model
-            } else {
-                c = new Code(inst.get(i), Integer.toHexString(4096 + (i * 4)), convertOPCODE(inst.get(i), inst, i)); //initialize model
-            }
-            code.add(c);
+            if(isNumeric(request.getParameter(registers[i])).equals("Invalid Input")) 
+                errReg.add(registers[i] + ": Invalid Input");
+            
+            r = new GPRegs(temp);
+            regs.add(r);
         }
         
-        request.setAttribute("code",code);
+        request.setAttribute("regs", regs);
+        
+        for (String line : codeInput.split("\\n")) {
+            inst.add(line);
+        }
+        
+        request.setAttribute("inst", inst);
+        
+        request.setAttribute("errReg", errReg);
+        
+        err = errorCheck(inst);
+                
+        if (err.size() > 1) {
+            for (int i = 0; i < err.size() - 1; i++) {
+                e = new Errors(err.get(i));
+                errors.add(e);
+            }
+            request.setAttribute("errors", errors);
+        } else {
+            for (int i = 0; i < inst.size(); i++) {
+                if (inst.get(i).startsWith(";")) {
+                    c = new Code(inst.get(i), null, null); //initialize model
+                } else {
+                    c = new Code(inst.get(i), Integer.toHexString(4096 + (i * 4)), convertOPCODE(inst.get(i), inst, i)); //initialize model
+                }
+                code.add(c);
+            }
+            request.setAttribute("code", code);
+        }
+        
         RequestDispatcher rd = request.getRequestDispatcher("index.jsp");
         rd.forward(request, response);
     }
@@ -69,9 +95,9 @@ public class getInput extends HttpServlet {
         String splitIns[], splitReg1[];
         int ctr = 0;
         String branchName[] = new String[100];
-        
+
         ArrayList<String> errors = new ArrayList<String>();
-        
+
         //Counting number of Branch Name found in the instruction lines
         for (int br = 0; br < size; br++) {
             String array = code.get(br);    //the index of array
@@ -394,10 +420,10 @@ public class getInput extends HttpServlet {
                 }
                 String a;
                 if (oldStr.startsWith("DADDIU") || oldStr.startsWith("XORI")) {
-                    if (!(splitReg1[2].substring(0, 1).equals("#"))) {
+                    if (!(splitReg1[2].startsWith("#"))) {
                         errors.add("Line " + (i + 1) + ": Syntax Error reg3 for " + oldStr);
                     }
-                    a = splitReg1[2].substring(1, 5);
+                    a = splitReg1[2];
                 } else {
                     a = splitReg1[1].substring(0, 4);
                 }
@@ -465,9 +491,9 @@ public class getInput extends HttpServlet {
                 }
             }
         }
-        
+
         errors.add(" ");
-        
+
         return errors;
     }
 
@@ -709,5 +735,20 @@ public class getInput extends HttpServlet {
         }
 
         return opcode;
+    }
+    
+    private String isNumeric(String reg) {
+        
+        if ( reg.length() != 16 || 
+             (reg.charAt(0) != '-' && Character.digit(reg.charAt(0), 16) == -1))
+            return "Invalid Input";
+        if ( reg.length() == 1 && reg.charAt(0) == '-' )
+            return "Invalid Input";
+
+        for ( int i = 1 ; i < reg.length() ; i++ )
+            if ( Character.digit(reg.charAt(i), 16) == -1 )
+                return "Invalid Input";
+        
+        return reg;
     }
 }
