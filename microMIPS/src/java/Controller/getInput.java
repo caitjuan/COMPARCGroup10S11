@@ -49,22 +49,22 @@ public class getInput extends HttpServlet {
             r = new GPRegs(temp);
             regs.add(r);
         }
-        
+
         request.setAttribute("errReg", errReg);
         request.setAttribute("regs", regs);
 
         //GET MEMORY
         String hex;
-        
+
         for (int i = 0; i < 256; i++) {
             hex = Integer.toHexString(i);
             char zeroExtend[] = new char[4];
             int extend = 3 - hex.length();
-            
+
             for (int zero = 0; zero < extend; zero++) {
                 zeroExtend[zero] = '0';
             }
-            
+
             char tempChar[] = new char[3 - extend];
             hex.getChars(0, 3 - extend, tempChar, 0);
 
@@ -77,34 +77,36 @@ public class getInput extends HttpServlet {
 
             String temp1 = request.getParameter(hex.toUpperCase() + "0");
             String temp2 = request.getParameter(hex.toUpperCase() + "8");
-            
+
             temp1 = isNumeric(temp1);
             temp2 = isNumeric(temp2);
-            
+
             m1 = new Memory(hex.toUpperCase() + "0", temp1);
             m2 = new Memory(hex.toUpperCase() + "8", temp2);
-            
-            if(temp1.equals("Invalid Input"))
+
+            if (temp1.equals("Invalid Input")) {
                 errMem.add(hex.toUpperCase() + "0" + ": Invalid Input");
-            if(temp2.equals("Invalid Input"))
+            }
+            if (temp2.equals("Invalid Input")) {
                 errMem.add(hex.toUpperCase() + "8" + ": Invalid Input");
-            
+            }
+
             mem.add(m1);
             mem.add(m2);
         }
 
         request.setAttribute("mem", mem);
         request.setAttribute("errMem", errMem);
-        
+
         //GET CODE
         for (String line : codeInput.split("\\n")) {
             inst.add(line);
         }
-        
+
         request.setAttribute("inst", inst);
 
         err = errorCheck(inst);
-
+        String opcode;
         if (err.size() > 1) {
             for (int i = 0; i < err.size() - 1; i++) {
                 e = new Errors(err.get(i));
@@ -113,12 +115,11 @@ public class getInput extends HttpServlet {
             request.setAttribute("errors", errors);
         } else {
             for (int i = 0; i < inst.size(); i++) {
-                if (inst.get(i).startsWith(";")) {
-                    c = new Code(inst.get(i), null, null); //initialize model
-                } else {
-                    c = new Code(inst.get(i), Integer.toHexString(4096 + (i * 4)), convertOPCODE(inst.get(i), inst, i)); //initialize model
+                if (!inst.get(i).startsWith(";")) {
+                    opcode = convertOPCODE(inst.get(i), inst, i);
+                    c = new Code(inst.get(i), Integer.toHexString(4096 + (i * 4)), opcode, BINtoHEX(opcode)); //initialize model
+                    code.add(c);
                 }
-                code.add(c);
             }
             request.setAttribute("code", code);
         }
@@ -152,13 +153,13 @@ public class getInput extends HttpServlet {
         int ctr = 0;
         String branchName[] = new String[100];
 
-        ArrayList<String> errors = new ArrayList<String>();
+        ArrayList<String> errors = new ArrayList<>();
 
         //Counting number of Branch Name found in the instruction lines
         for (int br = 0; br < size; br++) {
             String array = code.get(br).trim();    //the index of array
             String temp[];
-            
+
             int alength = array.length();
             int k = 0, exit = 0;
 
@@ -208,14 +209,20 @@ public class getInput extends HttpServlet {
                 oldStr = array;
             }
 
+            if (oldStr.contains(";") && !oldStr.startsWith(";")) {
+                oldStr = oldStr.substring(0, oldStr.indexOf(";") - 1);
+                oldStr = oldStr.trim();
+            }
+
             //Check if instruction is correct
-            if (!(oldStr.startsWith("LD") || oldStr.startsWith("SD") || oldStr.startsWith("DADDIU") || oldStr.startsWith("XORI") || oldStr.startsWith("BLTZ") || oldStr.startsWith("DADDU") || oldStr.startsWith("SLT") || oldStr.startsWith("BC")) && !oldStr.isEmpty()) {
+            if (!(oldStr.startsWith("LD") || oldStr.startsWith("SD") || oldStr.startsWith("DADDIU") || oldStr.startsWith("XORI") || oldStr.startsWith("BLTZ") || oldStr.startsWith("DADDU") || oldStr.startsWith("SLT") || oldStr.startsWith("BC") || oldStr.startsWith("NOP") || oldStr.startsWith(";")) && !oldStr.isEmpty()) {
                 errors.add("Line " + (i + 1) + ": Instruction does not exist");
             }
-            
-            if(oldStr.isEmpty())
+
+            if (oldStr.isEmpty()) {
                 errors.add("No code given");
-            
+            }
+
             //One Comma
             if (oldStr.startsWith("LD") || oldStr.startsWith("SD") || oldStr.startsWith("BLTZ")) {
                 if (comma != 1) {
@@ -360,10 +367,10 @@ public class getInput extends HttpServlet {
                 }
 
                 splitReg1 = splitIns[1].split(", ", 3); //[0]=rt, [1]=rs, [2]=imm
-                
+
                 int length1, m = 0, result;
                 length1 = splitReg1[2].length();    //rs.length
-                
+
                 boolean isValidReg = true;
                 if (splitReg1[2].startsWith("R") || splitReg1[2].startsWith("r")) {
                     /* Remove first("R") to get the INTEGER part */
@@ -381,7 +388,7 @@ public class getInput extends HttpServlet {
                 char reg1[] = new char[length1];
                 int j = 0;
                 int exit1 = 0;
-                    
+
                 if (isValidReg) {
                     splitReg1[2].getChars(0, length1, reg1, 0);
                     while (m < length1) {
@@ -400,9 +407,9 @@ public class getInput extends HttpServlet {
                         j++;
                     }
                 }
-                
+
                 if (exit1 == 0 || !isValidReg) {
-                    errors.add("Line " + (i + 1) + ": Syntax Error reg3 for " + oldStr);
+                    errors.add("Line " + (i + 1) + ": Syntax Error reg3 for (" + oldStr + ")");
                 }
             }
             //For LD base and SD base ONLY
@@ -625,9 +632,9 @@ public class getInput extends HttpServlet {
         while (splitIns[1].startsWith(" ") == true) {
             splitIns[1] = removeSpace(splitIns[1]);
         }
-        
+
         splitIns[1] = splitIns[1].trim();
-        
+
         builder.append(OPCODE);
         builder.append(findLabelOffset(splitIns[1], code, pctr, 26));
 
@@ -652,9 +659,9 @@ public class getInput extends HttpServlet {
         while (splitRS[1].startsWith(" ") == true) {
             splitRS[1] = removeSpace(splitRS[1]);
         }
-        
+
         splitRS[1] = splitRS[1].trim();
-        
+
         builder.append(OPCODE);
         builder.append(DECtoBIN(Integer.parseInt(splitRS[0].substring(1)), 5));
         builder.append(DECtoBIN(Integer.parseInt(splitRT[0].substring(1)), 5));
@@ -678,9 +685,9 @@ public class getInput extends HttpServlet {
             splitRT[1] = removeSpace(splitRT[1]);
         }
         String[] splitoffset = splitRT[1].split("\\(", 2);  // RESULT: [0] = "offset; [1] = "base"
-        
+
         splitoffset[1] = splitoffset[1].substring(0, splitoffset[1].indexOf(")"));
-        
+
         builder.append(OPCODE);
         builder.append(DECtoBIN(Integer.parseInt(splitoffset[1].substring(1)), 5));
         builder.append(DECtoBIN(Integer.parseInt(splitRT[0].substring(1)), 5));
@@ -703,9 +710,9 @@ public class getInput extends HttpServlet {
         while (splitRS[1].startsWith(" ") == true) {
             splitRS[1] = removeSpace(splitRS[1]);
         }
-        
+
         splitRS[1] = splitRS[1].trim();
-        
+
         builder.append(OPCODE);
         builder.append(DECtoBIN(Integer.parseInt(splitRS[0].substring(1)), 5));
         builder.append(RT);
@@ -732,9 +739,9 @@ public class getInput extends HttpServlet {
         while (splitRS[1].startsWith(" ") == true) {
             splitRS[1] = removeSpace(splitRS[1]);
         }
-        
+
         splitRS[1] = splitRS[1].trim();
-        
+
         builder.append(OPCODE);
         builder.append(DECtoBIN(Integer.parseInt(splitRS[0].substring(1)), 5));
         builder.append(DECtoBIN(Integer.parseInt(splitRS[1].substring(1)), 5));
@@ -763,6 +770,11 @@ public class getInput extends HttpServlet {
             FORMAT 3:   opcode  base  	rt/ft  	offset
             FORMAT 4:	opcode	rs      sat     offset
             FORMAT 5:	opcode	rs      rt      rd       sa   func */
+
+        if (instruction.contains(";") && !instruction.startsWith(";")) {
+            instruction = instruction.substring(0, instruction.indexOf(";"));
+            instruction = instruction.trim();
+        }
 
         if (instruction.startsWith("BC") || instruction.startsWith("bc")) {
             opcode = convertFORMAT1(instruction, opcodeTable[0][0], code, pctr);
