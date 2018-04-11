@@ -14,7 +14,7 @@ public class Memory {
     }
     
     public String getAddress(){
-        return value;
+        return address;
     }
     
     public void setValue(String value){

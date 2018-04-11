@@ -28,4 +28,5 @@ public class Code {
     public String getHex() {
         return hex;
     }
+    
 }

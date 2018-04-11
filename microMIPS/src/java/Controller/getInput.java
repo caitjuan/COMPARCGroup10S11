@@ -37,7 +37,9 @@ public class getInput extends HttpServlet {
         ArrayList<String> inst = new ArrayList<>();
 
         String temp;
-
+        
+        DataInserter in = new DataInserter();
+        
         //GET REGISTERS
         for (int i = 0; i < 32; i++) {
             temp = isNumeric(request.getParameter(registers[i]));
@@ -50,6 +52,15 @@ public class getInput extends HttpServlet {
             regs.add(r);
         }
 
+        try {
+            if (errReg.isEmpty()) {
+                for (int i = 0; i < 32; i++) {
+                    in.insertReg(regs.get(i).getReg(), i);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         request.setAttribute("errReg", errReg);
         request.setAttribute("regs", regs);
 
@@ -95,6 +106,16 @@ public class getInput extends HttpServlet {
             mem.add(m2);
         }
 
+        try {
+            if (errMem.isEmpty()) {
+                for (int i = 0; i < mem.size(); i++) {
+                    in.insertMemory(mem.get(i).getAddress(), mem.get(i).getValue());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         request.setAttribute("mem", mem);
         request.setAttribute("errMem", errMem);
 
@@ -121,6 +142,14 @@ public class getInput extends HttpServlet {
                     code.add(c);
                 }
             }
+            try {
+                for (int i = 0; i < code.size(); i++) {
+                    in.insertCode(code.get(i).getInstruction(), code.get(i).getOpcode(), code.get(i).getHex(), code.get(i).getAddress());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             request.setAttribute("code", code);
         }
 

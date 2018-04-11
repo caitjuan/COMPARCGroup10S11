@@ -1,6 +1,9 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="Model.*"%>
 <%@page import="java.util.*"%>
+<%@page import="javax.servlet.http.HttpServletRequest"%>
+<%@page import="javax.servlet.http.HttpServletResponse"%>
+<%@page import="javax.servlet.http.HttpServlet"%>
 
 <!DOCTYPE html>
 
@@ -18,24 +21,24 @@
             var GP = ["GP0", "GP1", "GP2", "GP3", "GP4", "GP5", "GP6", "GP7", "GP8", "GP9", "GP10", "GP11", "GP12", "GP13", "GP14", "GP15", "GP16", "GP17", "GP18", "GP19", "GP20", "GP21", "GP22", "GP23", "GP24", "GP25", "GP26", "GP27", "GP28", "GP29", "GP30", "GP31"];
             function customReset()
             {
-                for (var i = 0; i < 32; i++){
+                for (var i = 0; i < 32; i++) {
                     document.getElementById(registers[i]).value = "0000000000000000";
                 }
-                
-                for (var i = 0; i < 32; i++){
+
+                for (var i = 0; i < 32; i++) {
                     document.getElementById(GP[i]).value = "0000000000000000";
                 }
-                
-                for (var i = 0; i < 256; i+=2){
+
+                for (var i = 0; i < 256; i += 2) {
                     document.getElementById(i).value = "0000000000000000";
-                    document.getElementById(i+1).value = "0000000000000000";
+                    document.getElementById(i + 1).value = "0000000000000000";
                 }
-                
-                for (var i = 0; i < 256; i+=2){
+
+                for (var i = 0; i < 256; i += 2) {
                     document.getElementById("M" + i).value = "0000000000000000";
-                    document.getElementById("M" + (i+1)).value = "0000000000000000";
+                    document.getElementById("M" + (i + 1)).value = "0000000000000000";
                 }
-                
+
                 document.getElementById("GP0").value = "0000000000000000";
                 document.getElementById("error").value = "";
             }
@@ -94,7 +97,8 @@
                                     <th>
                                         <div style="overflow-y:scroll;height:305px;display:block;">
                                             <table>
-                                                <%  ArrayList<GPRegs> regs = (ArrayList<GPRegs>) request.getAttribute("regs");
+                                                <%
+                                                    ArrayList<GPRegs> regs = (ArrayList<GPRegs>) request.getAttribute("regs");
                                                     String[] regValue = new String[32];
                                                     if (regs == null) {
                                                         for (int i = 0; i < 32; i++) {
@@ -173,11 +177,12 @@
                                                         value2 = mem.get(j + 1).getValue();
                                                     }
 
-                                                    
+
                                             %>
                                             <%= hex.toUpperCase()%>0: <input type="text" value="<%=value1%>" id="<%= j%>" name="<%= hex.toUpperCase()%>0" /><br>
-                                            <%= hex.toUpperCase()%>8: <input type="text" value="<%=value2%>" id="<%= j+1%>" name="<%= hex.toUpperCase()%>8" /><br>                        
-                                            <%j += 2;}%>
+                                            <%= hex.toUpperCase()%>8: <input type="text" value="<%=value2%>" id="<%= j + 1%>" name="<%= hex.toUpperCase()%>8" /><br>                        
+                                            <%j += 2;
+                                                }%>
                                         </div></th>
                                 </tr>
                             </tbody>
@@ -365,8 +370,9 @@
                                                 j += 2;
                                         %>
                                         <%= hex.toUpperCase()%>0: <input type="text" id="M<%= k%>" value="<%=value1%>" name="<%= hex.toUpperCase()%>0" readonly /><br>
-                                        <%= hex.toUpperCase()%>8: <input type="text" id="M<%= k+1%>" value="<%=value2%>" name="<%= hex.toUpperCase()%>8" readonly /><br>                        
-                                        <% k+=2; } %>
+                                        <%= hex.toUpperCase()%>8: <input type="text" id="M<%= k + 1%>" value="<%=value2%>" name="<%= hex.toUpperCase()%>8" readonly /><br>                        
+                                        <% k += 2;
+                                            }%>
                                     </div></th>
                             </tr>
                         </tbody>
@@ -376,79 +382,86 @@
                 <!-- RUN TAB -->
                 <div id="run" class="tab-pane">
                     <h3>RUN</h3>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Pipeline Map</th>
-                                <th class="col-md-2">GP Registers</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <th>
-                                    <table class="table">
-                                        <thead>
+                    <form name="input-form" method="post" action="getInput">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Pipeline Map</th>
+                                    <th class="col-md-2">GP Registers</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th>
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th class="col-md-4">Instructions</th>
+                                                    <th>1</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>DADDIU</td>
+                                                    <td>IF</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </th>
+                                    <th>
+                                        <table class="table">
                                             <tr>
-                                                <th class="col-md-4">Instructions</th>
-                                                <th>1</th>
+                                                <td class="col-md-1">R1</td>
+                                                <td>0000000000000000</td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>DADDIU</td>
-                                                <td>IF</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </th>
-                                <th>
-                                    <table class="table">
-                                        <tr>
-                                            <td class="col-md-1">R1</td>
-                                            <td>0000000000000000</td>
-                                        </tr>
-                                    </table>
-                                </th>
-                            </tr>
-                        </tbody>
-                    </table>
+                                        </table>
+                                    </th>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Internal Registers</th>
-                                <th class="col-md-2">Memory</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <th>
-                                    <table class="table">
-                                        <thead>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Internal Registers</th>
+                                    <th class="col-md-2">Memory</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th>
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th class="col-md-4">Instructions</th>
+                                                    <th>1</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>DADDIU</td>
+                                                    <td>IF</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </th>
+                                    <th>
+                                        <table class="table">
                                             <tr>
-                                                <th class="col-md-4">Instructions</th>
-                                                <th>1</th>
+                                                <td class="col-md-1">0000</td>
+                                                <td>0000000000000000</td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>DADDIU</td>
-                                                <td>IF</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </th>
-                                <th>
-                                    <table class="table">
-                                        <tr>
-                                            <td class="col-md-1">0000</td>
-                                            <td>0000000000000000</td>
-                                        </tr>
-                                    </table>
-                                </th>
-                            </tr>
-                        </tbody>
-                    </table>
+                                        </table>
+                                    </th>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="center-div">
+                            <input type="button" value="Run Single" class="btn" onclick="runSingle('<%= c%>');" />
+                            <input type="button" value="Run Continuous" class="btn" onclick="runContinuous();"/>
+                        </div>                        
+                    </form>
                 </div>
             </div>
         </div>
