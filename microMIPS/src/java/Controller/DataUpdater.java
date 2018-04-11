@@ -45,4 +45,42 @@ public class DataUpdater {
         }
         ResultSet rs = database.executeQueryWithReturn(ps);
     }
+    
+    public void reset(){
+        resetReg();
+        resetMem();
+        resetCode();
+        resetCycle();
+    }
+    
+    public void resetReg(){
+        String query = "TRUNCATE minimips.regs;";
+        PreparedStatement ps = database.createStatement(query); 
+        
+        database.executeQueryNoReturn(ps);
+    }
+    
+    public void resetMem(){
+        String query = "TRUNCATE minimips.memory;";
+        
+        PreparedStatement ps = database.createStatement(query);
+        
+        database.executeQueryNoReturn(ps);
+    }
+    
+    public void resetCode(){
+        String query = "TRUNCATE minimips.code;";
+        
+        PreparedStatement ps = database.createStatement(query);
+        
+        database.executeQueryNoReturn(ps);
+    }
+    
+    public void resetCycle(){
+        String query = "TRUNCATE minimips.cycle;";
+        
+        PreparedStatement ps = database.createStatement(query);
+        
+        database.executeQueryNoReturn(ps);
+    }
 }

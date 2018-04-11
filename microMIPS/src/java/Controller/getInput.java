@@ -39,6 +39,9 @@ public class getInput extends HttpServlet {
         String temp;
         
         DataInserter in = new DataInserter();
+        DataUpdater up = new DataUpdater();
+        
+        up.reset();
         
         //GET REGISTERS
         for (int i = 0; i < 32; i++) {
@@ -61,6 +64,7 @@ public class getInput extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        
         request.setAttribute("errReg", errReg);
         request.setAttribute("regs", regs);
 
