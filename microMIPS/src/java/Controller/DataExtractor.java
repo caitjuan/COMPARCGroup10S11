@@ -17,7 +17,46 @@ public class DataExtractor {
     public void close(){
         database.closeDB();
     }
-        
+    
+    public ResultSet getCode(String address){
+        String query = "	SELECT * FROM minimips.code\n" +
+"	WHERE address = ?";
+        PreparedStatement ps = database.createStatement(query);
+        try {
+            ps.setString(1, address);
+        } catch (SQLException ex) {
+            Logger.getLogger(DataExtractor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        ResultSet rs = database.executeQueryWithReturn(ps);
+        return rs;
+    }
+    
+    public ResultSet getReg(int id){
+        String query = "	SELECT * FROM minimips.regs\n" +
+"	WHERE id = ?";
+        PreparedStatement ps = database.createStatement(query);
+        try {
+            ps.setInt(1, id);
+        } catch (SQLException ex) {
+            Logger.getLogger(DataExtractor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        ResultSet rs = database.executeQueryWithReturn(ps);
+        return rs;
+    }
+    
+    public ResultSet getMem(String address){
+        String query = "	SELECT * FROM minimips.memory\n" +
+"	WHERE address = ?";
+        PreparedStatement ps = database.createStatement(query);
+        try {
+            ps.setString(1, address);
+        } catch (SQLException ex) {
+            Logger.getLogger(DataExtractor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        ResultSet rs = database.executeQueryWithReturn(ps);
+        return rs;
+    }
+    
     public ResultSet getCycle(int cyclenum){
         String query = "	SELECT * FROM minimips.cycle\n" +
 "	WHERE cyclenum = ?";
