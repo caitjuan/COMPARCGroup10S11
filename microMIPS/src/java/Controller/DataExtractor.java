@@ -17,7 +17,7 @@ public class DataExtractor {
     public void close(){
         database.closeDB();
     }
-    
+        
     public ResultSet getCycle(int cyclenum){
         String query = "	SELECT * FROM minimips.cycle\n" +
 "	WHERE cyclenum = ?";

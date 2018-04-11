@@ -16,7 +16,7 @@ public class DataInserter {
         database.closeDB();
     }
     
-    public void insertCode(String instruction, String address, String opcode, String hex){
+    public void insertCode(String instruction, String opcode, String hex, String address){
         String query = "INSERT INTO minimips.code(instruction, opcode, hex, address) "
                 + "VALUES (?,?,?,?);";
         PreparedStatement ps = database.createStatement(query);
