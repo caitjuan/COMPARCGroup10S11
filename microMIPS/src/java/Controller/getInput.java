@@ -125,7 +125,7 @@ public class getInput extends HttpServlet {
 
         //GET CODE
         for (String line : codeInput.split("\\n")) {
-            inst.add(line);
+            inst.add(line.toUpperCase());
         }
 
         request.setAttribute("inst", inst);

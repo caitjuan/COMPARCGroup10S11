@@ -383,6 +383,19 @@
                 <div id="run" class="tab-pane">
                     <h3>RUN</h3>
                     <form name="input-form" method="post" action="getInput">
+                        <%
+                            String pcVal = (String) request.getAttribute("pcVal");
+                            if(pcVal == null)
+                                pcVal = "1000";
+                            
+                            int cyclenum;
+                            if(pcVal == "1000")
+                                cyclenum = 1;
+                            else
+                                cyclenum = (int) request.getAttribute("cyclenum");
+                        %>
+                        <input type="hidden" name="pcVal" value="<%= pcVal %>">
+                        <input type="hidden" name="cyclenum" value="<%= cyclenum %>">
                         <table class="table">
                             <thead>
                                 <tr>

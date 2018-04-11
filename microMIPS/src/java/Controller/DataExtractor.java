@@ -31,6 +31,19 @@ public class DataExtractor {
         return rs;
     }
     
+    public ResultSet getCodeWithHex(String hex){
+        String query = "	SELECT * FROM minimips.code\n" +
+"	WHERE hex = ?";
+        PreparedStatement ps = database.createStatement(query);
+        try {
+            ps.setString(1, hex);
+        } catch (SQLException ex) {
+            Logger.getLogger(DataExtractor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        ResultSet rs = database.executeQueryWithReturn(ps);
+        return rs;
+    }
+    
     public ResultSet getReg(int id){
         String query = "	SELECT * FROM minimips.regs\n" +
 "	WHERE id = ?";
